@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: setup-go
+      uses: actions/setup-go@v2.0.3
+      with:
+        go-version: 1.14
+    
+    - name: checkout
+      uses: actions/checkout@v2
+
+#     - name: make manager
+#       run: make manager
+
+#     - name: make docker-build docker-push
+#       env:
+#         IMAGE: juanlee/carp-controller
+#         GITHUB_SHA: ${{ github.sha }}
+#         REGISTRY_USERNAME: juanlee
+#         REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+#       run: |
+#         docker login -u ${REGISTRY_USERNAME} --password ${REGISTRY_PASSWORD}
+#         RELEASE_TAG="${GITHUB_SHA}"
+#         IMG="${IMAGE}:${RELEASE_TAG}" make docker-build docker-push
