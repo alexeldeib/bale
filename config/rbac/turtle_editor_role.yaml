@@ -1,20 +1,24 @@
-# permissions for end users to view bales.
+# permissions for end users to edit turtles.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: bale-viewer-role
+  name: turtle-editor-role
 rules:
 - apiGroups:
   - infra.alexeldeib.xyz
   resources:
-  - bales
+  - turtles
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - infra.alexeldeib.xyz
   resources:
-  - bales/status
+  - turtles/status
   verbs:
   - get

@@ -23,13 +23,17 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	infrastructurev1alpha3 "github.com/alexeldeib/bale/api/v1alpha3"
+	infrav1alpha1 "github.com/alexeldeib/bale/api/v1alpha1"
 )
 
 // BaleReconciler reconciles a Bale object
@@ -39,20 +43,67 @@ type BaleReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=bales,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=bales/status,verbs=get;update;patch
-
-func (r *BaleReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
-	_ = r.Log.WithValues("bale", req.NamespacedName)
-
-	// your logic here
-
-	return ctrl.Result{}, nil
-}
-
 func (r *BaleReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&infrastructurev1alpha3.Bale{}).
+		For(&infrav1alpha1.Bale{}).
+		Owns(&infrav1alpha1.Turtle{}).
 		Complete(r)
+}
+
+// +kubebuilder:rbac:groups=infra.alexeldeib.xyz,resources=bales,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=infra.alexeldeib.xyz,resources=bales/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=infra.alexeldeib.xyz,resources=turtles,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=infra.alexeldeib.xyz,resources=turtles/status,verbs=get;update;patch
+
+func (r *BaleReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	ctx := context.Background()
+	log := r.Log.WithValues("bale", req.NamespacedName)
+
+	var bale infrav1alpha1.Bale
+	if err := r.Get(ctx, req.NamespacedName, &bale); err != nil {
+		log.Error(err, "unable to fetch")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	selector, err := metav1.LabelSelectorAsSelector(bale.Spec.Selector)
+	if err != nil {
+		log.Error(err, "failed to convert selector")
+		return ctrl.Result{}, err
+
+	}
+
+	var armada infrav1alpha1.TurtleList
+	if err := r.List(context.Background(), &armada, client.MatchingLabelsSelector{Selector: selector}); err != nil {
+		log.Error(err, "unable to fetch bale list")
+		return ctrl.Result{}, err
+	}
+
+	diff := bale.Spec.Replicas - int32(len(armada.Items))
+	if diff <= 0 {
+		log.Info(fmt.Sprintf("found %d replicas, required %d, diff of %d. returning early", len(armada.Items), bale.Spec.Replicas, diff))
+	}
+
+	for i := 0; int32(i) < diff; i++ {
+		name := "acecap-" + RandomLowercaseString(6)
+		turtle := new(infrav1alpha1.Turtle)
+		turtle.Namespace = bale.Namespace
+		turtle.Name = name
+		turtle.Spec = *bale.Spec.Template.DeepCopy()
+		turtle.Spec.ResourceGroup = name
+		want := turtle.DeepCopy()
+
+		_, err := controllerutil.CreateOrUpdate(ctx, r.Client, turtle, func() error {
+			if err := controllerutil.SetControllerReference(turtle, want, r.Scheme); err != nil {
+				return err
+			}
+			turtle = want
+			return nil
+		})
+
+		if err != nil {
+			return ctrl.Result{}, errors.Wrap(err, "failed to create/update turtle: %w")
+		}
+	}
+
+	return ctrl.Result{}, nil
 }

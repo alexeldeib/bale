@@ -1,0 +1,17 @@
+apiVersion: infra.alexeldeib.xyz/v1alpha1
+kind: Bale
+metadata:
+  name: bale-sample
+spec:
+  replicas: 2
+  subscriptionId: f7554151-cce6-47fd-b129-c53bd4b238f2
+  selector:
+    matchLabels:
+      group: webserver
+  template:
+    location: southcentralus
+    version: v1.18.3
+    hatchlings:
+    - name: default
+      replicas: 2
+        

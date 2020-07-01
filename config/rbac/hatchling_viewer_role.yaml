@@ -1,13 +1,13 @@
-# permissions for end users to view bales.
+# permissions for end users to view hatchlings.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: bale-viewer-role
+  name: hatchling-viewer-role
 rules:
 - apiGroups:
   - infra.alexeldeib.xyz
   resources:
-  - bales
+  - hatchlings
   verbs:
   - get
   - list
@@ -15,6 +15,6 @@ rules:
 - apiGroups:
   - infra.alexeldeib.xyz
   resources:
-  - bales/status
+  - hatchlings/status
   verbs:
   - get

@@ -1,0 +1,14 @@
+{
+  "name": "bale",
+  "config": {
+    "image": "docker.io/alexeldeib/bale-controller",
+    "live_reload_deps": [
+      "main.go",
+      "go.mod",
+      "go.sum",
+      "api",
+      "controllers",
+      "pkg"
+    ]
+  }
+}

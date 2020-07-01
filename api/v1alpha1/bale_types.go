@@ -19,22 +19,19 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package v1alpha3
+package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // BaleSpec defines the desired state of Bale
 type BaleSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Bale. Edit Bale_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// +kubebuilder:default=1
+	Replicas       int32                 `json:"replicas,omitempty"`
+	Selector       *metav1.LabelSelector `json:"selector"`
+	SubscriptionID string                `json:"subscriptionId,omitempty"`
+	Template       TurtleSpec            `json:"template,omitempty"`
 }
 
 // BaleStatus defines the observed state of Bale

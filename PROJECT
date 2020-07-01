@@ -1,7 +1,13 @@
-domain: cluster.x-k8s.io
+domain: alexeldeib.xyz
 repo: github.com/alexeldeib/bale
 resources:
-- group: infrastructure
+- group: infra
   kind: Bale
-  version: v1alpha3
+  version: v1alpha1
+- group: infra
+  kind: Turtle
+  version: v1alpha1
+- group: infra
+  kind: Hatchling
+  version: v1alpha1
 version: "2"

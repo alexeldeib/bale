@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= docker.io/alexeldeib/bale-controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
@@ -38,9 +38,22 @@ deploy: manifests
 	cd config/manager && kustomize edit set image controller=${IMG}
 	kustomize build config/default | kubectl apply -f -
 
+.PHONY: generate
+generate:
+	$(MAKE) generate-manifests
+	$(MAKE) generate-go
+
 # Generate manifests e.g. CRD, RBAC etc.
-manifests: controller-gen
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+.PHONY: generate-manifests
+generate-manifests: controller-gen
+	$(CONTROLLER_GEN) \
+		paths=./api/... \
+		paths=./controllers/... \
+		crd:crdVersions=v1 \
+		rbac:roleName=manager-role \
+		output:crd:dir=./config/crd/bases \
+		output:webhook:dir=./config/webhook \
+		webhook
 
 # Run go fmt against code
 fmt:
@@ -51,7 +64,8 @@ vet:
 	go vet ./...
 
 # Generate code
-generate: controller-gen
+.PHONY: generate-go
+generate-go: controller-gen
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 # Build the docker image

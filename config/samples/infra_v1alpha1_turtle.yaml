@@ -1,0 +1,7 @@
+apiVersion: infra.alexeldeib.xyz/v1alpha1
+kind: Turtle
+metadata:
+  name: turtle-sample
+spec:
+  # Add fields here
+  foo: bar

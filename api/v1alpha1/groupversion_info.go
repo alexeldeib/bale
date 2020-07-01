@@ -19,10 +19,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// Package v1alpha3 contains API Schema definitions for the infrastructure v1alpha3 API group
+// Package v1alpha1 contains API Schema definitions for the infra v1alpha1 API group
 // +kubebuilder:object:generate=true
-// +groupName=infrastructure.cluster.x-k8s.io
-package v1alpha3
+// +groupName=infra.alexeldeib.xyz
+package v1alpha1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -31,7 +31,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "infrastructure.cluster.x-k8s.io", Version: "v1alpha3"}
+	GroupVersion = schema.GroupVersion{Group: "infra.alexeldeib.xyz", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
